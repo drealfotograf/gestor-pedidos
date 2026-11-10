@@ -62,6 +62,13 @@ El `…-pedido.json` (versión 1, ver `construirPedidoJSON`) está pensado como 
   `photoselector_tarifas_guardadas`. IndexedDB: base `gestor-pedidos`, tablas `miniaturas`, `catalogo`, `ajustes`.
 - Lo borrado del catálogo no rompe pedidos guardados: la línea queda «(no disponible)» con precio 0.
 
+## Repositorios
+
+- `origin` → `drealfotograf/gestor-pedidos` (**público**, historial limpio). Aquí se trabaja y se sube `master`.
+- `privado` → `drealfotograf/gestor-pedidos-privado` (privado): copia del historial antiguo, que contiene datos de
+  empresa. **No hacerlo público nunca** ni mezclar su rama `historial-privado` con `master`.
+- Los commits de este repositorio usan el correo `…@users.noreply.github.com` (configurado solo aquí).
+
 ## Cómo trabajar
 
 - Servir: `python -m http.server 8765` (o la configuración `gestor-pedidos` de `.claude/launch.json`).
