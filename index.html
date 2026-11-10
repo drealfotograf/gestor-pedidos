@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestor de pedidos</title>
+
+<!-- ► PWA -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f2740">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pedidos">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/app.css">
+<link rel="stylesheet" href="./css/catalogo.css">
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-spinner"></div>
+  <div class="loader-text" id="loaderText">Cargando PhotoSelector...</div>
+</div>
+
+<div id="app">
+  <div class="brandbar">
+    <div class="marca" id="marcaEmpresa">Mi estudio de fotografía</div>
+    <div class="contacto" id="contactoEmpresa">
+    </div>
+    <button class="btn-config" id="btnConfig" title="Configuración (requiere contraseña)">⚙️</button>
+  </div>
+
+  <header>
+    <label>📁 Abrir carpeta de fotos<input type="file" id="f" webkitdirectory directory multiple></label>
+    <label>📊 Cargar tarifas<input type="file" id="fx" accept=".xlsx,.xls"></label>
+    <span class="tariff-badge" id="tariffBadge">Tarifa: <strong id="tarifaNombre">—</strong> <span id="tariffOrigen"></span></span>
+    <button id="btnBorrarTarifas" title="Volver a las tarifas fijas" style="display:none">🗑 Tarifas</button>
+    <button id="btnIncrustarTarifas" title="Descargar tarifas-fijas.js con las tarifas actuales">💾 Guardar tarifas fijas</button>
+    <button id="btnNuevoPedido" class="nuevo-btn" title="Empezar un pedido nuevo">🆕 Nuevo pedido</button>
+    <input type="text" class="search-box" id="buscar" placeholder="🔍 Buscar por nº (ej: 0001 0478 6208)">
+    <button class="order-btn" id="btnPedido" disabled>🧾 Generar Pedido (0)</button>
+  </header>
+
+  <div class="bar"><div id="prog"></div></div>
+
+  <div id="barraBloque">
+    <span class="contador" id="contSel">0 fotos seleccionadas</span>
+    <label>Tamaño:</label>
+    <select id="bulkTamano"></select>
+    <label>Cantidad:</label>
+    <input type="number" id="bulkCantidad" value="1" min="1">
+    <button class="btn-aplicar" id="btnBulkAplicar">Aplicar a seleccionadas</button>
+    <button class="btn-anadir" id="btnBulkAnadir">Añadir a seleccionadas</button>
+    <button class="btn-anadir" id="btnBulkProductos">🛍 Productos</button>
+    <button class="btn-limpiar" id="btnBulkLimpiar">Limpiar pedido de seleccionadas</button>
+    <button class="btn-deselect" id="btnBulkDeselect">Deseleccionar</button>
+  </div>
+
+  <div class="order-header">
+    <div class="info">
+      <span>Carpeta: <strong id="hFolder">—</strong></span>
+      <span><span id="hVisibles">0</span> / <span id="hTotal">0</span></span>
+      <span id="hSinValorar"></span>
+    </div>
+    <div class="counts-by-size" id="hCounts"></div>
+    <div class="totals">
+      <span class="total-count">📸 <span id="hCopias">0</span> copias</span>
+      <span class="total-amount" id="hImporte">0.00 €</span>
+    </div>
+  </div>
+
+  <div class="filtros" id="filtros"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="lb">
+  <button id="lbcerrar" title="Cerrar (Espacio o Esc)">✕</button>
+  <div id="lbzonaFoto">
+    <img id="lbimg" alt="">
+  </div>
+
+  <!-- ► BARRA INFERIOR: nombre + panel horizontal -->
+  <div id="lbbarrainferior">
+    <div id="lbnamebar">
+      <div id="lbname"></div>
+      <span id="lbperfil" style="display:none"></span>
+    </div>
+    <div id="lbpanel" class="expandido">
+      <div id="lbpanelHeader">
+        <span class="titulo-panel">Gestión de Foto</span>
+        <button id="lbtoggle" title="Minimizar/expandir panel">⋯</button>
+      </div>
+      <div id="lbpanelBody">
+        <div class="estrellas" id="lbrating"></div>
+        <div class="seccion">
+          <div class="seccion-titulo">Anotación / Notas</div>
+          <textarea id="lbnotes" placeholder="Escribe notas de esta imagen..."></textarea>
+        </div>
+        <div class="seccion">
+          <div class="seccion-titulo">Impresión</div>
+          <div id="lblineas"></div>
+        </div>
+        <div id="lbtotal"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="./vendor/jspdf.umd.min.js"></script>
+<script src="./vendor/xlsx.full.min.js"></script>
+<script src="./vendor/qrcode.js"></script>
+
+<!-- Datos de la empresa: opcional y fuera del repositorio (ver js/config.local.example.js) -->
+<script src="./js/config.local.js"></script>
+<script src="./js/config.js"></script>
+<script src="./js/tarifas-fijas.js"></script>
+<script src="./js/estado.js"></script>
+<script src="./js/tarifas.js"></script>
+<script src="./js/almacen.js"></script>
+<script src="./js/exif.js"></script>
+<script src="./js/miniaturas.js"></script>
+<script src="./js/catalogo.js"></script>
+<script src="./js/galeria.js"></script>
+<script src="./js/catalogo-editor.js"></script>
+<script src="./js/rejilla.js"></script>
+<script src="./js/visor.js"></script>
+<script src="./js/pedido.js"></script>
+<script src="./js/pedido-datos.js"></script>
+<script src="./js/carpeta.js"></script>
+<script src="./js/documentos.js"></script>
+<script src="./js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+services:
+  gestor-pedidos:
+    build: .
+    container_name: gestor-pedidos
+    restart: unless-stopped
+    ports:
+      - "8080:80"
